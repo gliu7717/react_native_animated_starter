@@ -25,5 +25,62 @@ export const Pieces = [
       height:200,
       x : 0,
       y:  0
+    },
+    {
+      name:'zhaoyun',
+      img:require("./assets/zhaoyun.png"),
+      width:100,
+      height:200,
+      x : BLOCKSIZE*3,
+      y:  0
+    },
+    {
+      name:'machao',
+      img:require("./assets/machao.png"),
+      width:100,
+      height:200,
+      x : 0,
+      y:  BLOCKSIZE * 2
+    },
+    {
+      name:'huangzhong',
+      img:require("./assets/huangzhong.png"),
+      width:100,
+      height:200,
+      x : BLOCKSIZE *3,
+      y:  BLOCKSIZE *2
+    },
+    {
+      name:'solidier1',
+      img:require("./assets/soldier.png"),
+      width:100,
+      height:100,
+      x : 0,
+      y: BLOCKSIZE *4
+    },
+    {
+      name:'solidier2',
+      img:require("./assets/soldier.png"),
+      width:100,
+      height:100,
+      x : BLOCKSIZE *3,
+      y: BLOCKSIZE  *4
+    },
+    {
+      name:'solidier3',
+      img:require("./assets/soldier.png"),
+      width:100,
+      height:100,
+      x : BLOCKSIZE ,
+      y : BLOCKSIZE *3
+    },
+    {
+      name:'solidier4',
+      img:require("./assets/soldier.png"),
+      width:100,
+      height:100,
+      x : BLOCKSIZE*2 ,
+      y : BLOCKSIZE *3
     }  
+
   ];

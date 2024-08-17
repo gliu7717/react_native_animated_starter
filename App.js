@@ -1,5 +1,5 @@
 import { Dimensions, StyleSheet, View,Image } from 'react-native';
-import { useEffect } from 'react';
+import { useEffect,useState } from 'react';
 import {
   Gesture,
   GestureDetector,
@@ -10,6 +10,7 @@ import Animated, {
   useSharedValue,
   withSpring,
   withRepeat,
+  runOnJS
 } from 'react-native-reanimated';
 import { Pieces, BLOCKSIZE } from './Pieces';
 
@@ -24,12 +25,19 @@ const handleRotation = (progress) => {
 
 const SIZE = 80;
 export default function App() {
-  const index =2
+  const [index, setIndex] = useState(0);
+
   const progress = useSharedValue(1);
   const scale = useSharedValue(1.5);
   const translateX = useSharedValue(0);
   const translateY = useSharedValue(0);
   const context = useSharedValue({ x: 0, y: 0 });
+
+  function incrementRerender() {
+    if( index < Pieces.length - 1)
+      setIndex(index + 1);
+  }
+
   const gesture = Gesture.Pan()
     .onStart(() => {
       context.value = { x: translateX.value, y: translateY.value };
@@ -41,13 +49,15 @@ export default function App() {
     .onEnd(() => {
         translateX.value = Pieces[index].x + xoffset + Pieces[index].width / 2;
         translateY.value = Pieces[index].y + yoffset + Pieces[index].height / 2;
+    }).onFinalize(()=>{
+        runOnJS(incrementRerender)();
     });
 
   const rStyle = useAnimatedStyle(() => {
     return {
       transform: [{ translateX:withSpring( translateX.value ) }, { translateY: withSpring(translateY.value) }],
     };
-  });
+  },[index]);
 
   const reanimatedStyle = useAnimatedStyle(() => {
     return {
@@ -59,12 +69,11 @@ export default function App() {
   useEffect(() => {
     progress.value = withRepeat(withSpring(0.5), 4, true);
     scale.value = withRepeat(withSpring(1), 5, true);
-  }, []);
+  }, [index]);
   
   
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>
-
       <View style={styles.center_container}>
         <GestureDetector gesture={gesture}>
           <Animated.View style={[reanimatedStyle, rStyle]}>
@@ -72,7 +81,20 @@ export default function App() {
                 height:Pieces[index].height}]}/>
           </Animated.View>
         </GestureDetector>
+
+        {Pieces.map((piece, i) =>{
+          return i<index?
+          <Animated.View  key={i}>
+          <Image source={Pieces[i].img} style={[{width:Pieces[i].width, 
+                height:Pieces[i].height, position: 'absolute', 
+                top:Pieces[i].y+ yoffset - Pieces[index].height / 2, left:Pieces[i].x + xoffset}]} />
+          </Animated.View> :null 
+          })
+       }
+
       </View>
+      
+      
 
     </GestureHandlerRootView>
   );
