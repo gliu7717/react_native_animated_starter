@@ -1,4 +1,5 @@
-import { Dimensions, StyleSheet, View } from 'react-native';
+import { Dimensions, StyleSheet, View,Image } from 'react-native';
+import { useEffect } from 'react';
 import {
   Gesture,
   GestureDetector,
@@ -8,14 +9,24 @@ import Animated, {
   useAnimatedStyle,
   useSharedValue,
   withSpring,
+  withRepeat,
 } from 'react-native-reanimated';
+import { Pieces, BLOCKSIZE } from './Pieces';
 
+const { width: SCREEN_WIDTH, height:SCREEN_HEIGHT } = Dimensions.get('window');
+export const xoffset = 10 - SCREEN_WIDTH/2 
+export const yoffset = 50 - SCREEN_HEIGHT/2
 
-
-const { width: SCREEN_WIDTH } = Dimensions.get('window');
+const handleRotation = (progress) => {
+  'worklet';
+  return `${progress.value * 2 * Math.PI}rad`;
+};
 
 const SIZE = 80;
 export default function App() {
+  const index =2
+  const progress = useSharedValue(1);
+  const scale = useSharedValue(1.5);
   const translateX = useSharedValue(0);
   const translateY = useSharedValue(0);
   const context = useSharedValue({ x: 0, y: 0 });
@@ -28,11 +39,8 @@ export default function App() {
       translateY.value = event.translationY + context.value.y;
     })
     .onEnd(() => {
-      if (translateX.value > SCREEN_WIDTH / 2) {
-        translateX.value = SCREEN_WIDTH - SIZE;
-      } else {
-        translateX.value = 0;
-      }
+        translateX.value = Pieces[index].x + xoffset + Pieces[index].width / 2;
+        translateY.value = Pieces[index].y + yoffset + Pieces[index].height / 2;
     });
 
   const rStyle = useAnimatedStyle(() => {
@@ -41,13 +49,31 @@ export default function App() {
     };
   });
 
+  const reanimatedStyle = useAnimatedStyle(() => {
+    return {
+      opacity: progress.value,
+      borderRadius: (progress.value * SIZE) / 2,
+      transform: [{ scale: scale.value }, { rotate: handleRotation(progress) }],
+    };
+  }, []);
+  useEffect(() => {
+    progress.value = withRepeat(withSpring(0.5), 4, true);
+    scale.value = withRepeat(withSpring(1), 5, true);
+  }, []);
+  
+  
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>
-      <View style={styles.container}>
+
+      <View style={styles.center_container}>
         <GestureDetector gesture={gesture}>
-          <Animated.View style={[styles.circle, rStyle]} />
+          <Animated.View style={[reanimatedStyle, rStyle]}>
+          <Image source={Pieces[index].img} style={[{width:Pieces[index].width, 
+                height:Pieces[index].height}]}/>
+          </Animated.View>
         </GestureDetector>
       </View>
+
     </GestureHandlerRootView>
   );
 }
@@ -64,5 +90,11 @@ const styles = StyleSheet.create({
     backgroundColor: 'green',
     borderRadius: SIZE / 2,
     opacity: 0.8,
+  },
+  center_container: {
+    flex: 1,
+    backgroundColor: '#fff',
+    alignItems: 'center',
+    justifyContent: 'center',
   },
 });
